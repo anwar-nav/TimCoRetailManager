@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using TRMDesktopUI.Helpers;
 using TRMDesktopUI.ViewModels;
 
 namespace TRMDesktopUI
@@ -22,12 +24,19 @@ namespace TRMDesktopUI
         public Bootstrapper()
         {
             Initialize();
+
+            //Using the PasswordBoxHelper class and binding the property with Caliburn.micro
+            ConventionManager.AddElementConvention<PasswordBox>(
+            PasswordBoxHelper.BoundPasswordProperty,
+            "Password",
+            "PasswordChanged");
         }
 
         //This is where actual instantiation happens or container knows what to connect to what. The container holds the 
         //instance of itself to pass out when SimpleContainer is called. This container is required in order to manipulate
         //or to change or to get information out of it besides from constructor. This configure runs once at start of application.
         //Added Singleton for Window Manager and Event Aggregator based in caliburn.micro. for managing windows and passing event messages.
+        //Added Singleton for APIHelper for managing instance of it.
         //Added reflection (It's slow so string builder is better to use).
         protected override void Configure()
         {
@@ -35,7 +44,8 @@ namespace TRMDesktopUI
 
             _container
                 .Singleton<IWindowManager, WindowManager>() //Interface tied with implementation.
-                .Singleton<IEventAggregator, EventAggregator>(); //Interface tied with implementation.
+                .Singleton<IEventAggregator, EventAggregator>() //Interface tied with implementation.
+                .Singleton<IAPIHelper, APIHelper>(); //Interface tied with implementation.
 
             GetType().Assembly.GetTypes() //reflection gettype of running assembly and get all the types for our current instance.
                 .Where(type => type.IsClass) //limit to type of class.
