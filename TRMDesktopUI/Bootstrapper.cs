@@ -46,7 +46,6 @@ namespace TRMDesktopUI
 
         }
 
-
         //This method will override the base class method and be used on startup of application.
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
