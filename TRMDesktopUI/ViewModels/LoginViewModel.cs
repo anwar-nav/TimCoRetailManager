@@ -4,26 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMDesktopUI.EventModels;
 using TRMDesktopUI.Library.API;
 
 namespace TRMDesktopUI.ViewModels
 {
     /// <summary>
     /// This Model will be called by ShellViewModel and hence LoginView will be displayed on ShellView.
+    /// On Successfull Log On an event will be published on UI thread giving the instance of LogOnEvent.
     /// </summary>
     public class LoginViewModel : Screen
     {
         //Declared private properties.
         private string _username;
         private string _password;
-        private IAPIHelper _apiHelper;
         private string _errorMessage;
+        private IAPIHelper _apiHelper;
+        private IEventAggregator _events;
 
-
-        //This will set the value of _apiHelper (Dependency injection).
-        public LoginViewModel(IAPIHelper apiHelper)
+        //This will set the value of _apiHelper and _events (Dependency injection).
+        public LoginViewModel(IAPIHelper apiHelper, IEventAggregator events)
         {
             _apiHelper = apiHelper;
+            _events = events;
         }
 
         //Getter and Setter for declared private properties and raise property change event.
@@ -98,6 +101,7 @@ namespace TRMDesktopUI.ViewModels
         //Calling _apiHelper Authenticate method to get the token and storing it in result.
         //Calling _apiHelper GetLoggedInUser method by passing the token value to get the info Logged in user 
         //and creating an instance of LoggedInUserModel which will store all the info.
+        //Event is published (broadcasted) on UI thread giving an instance of LogOnEvent class as specified in name.
         public async Task LogIn()
         {
             try
@@ -106,6 +110,8 @@ namespace TRMDesktopUI.ViewModels
                 var result = await _apiHelper.Authenticate(UserName, Password);
 
                 await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
+
+                _events.PublishOnUIThread(new LogOnEvent());
             }
             catch (Exception ex)
             {

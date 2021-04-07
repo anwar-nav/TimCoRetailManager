@@ -16,7 +16,7 @@ namespace TRMDesktopUI.ViewModels
         //Declared private properties.
         private BindingList<string> _products;
         private BindingList<string> _cart;
-        private string _itemQuantity;
+        private int _itemQuantity;
 
         //ListBox Products
         //Getter and Setter for declared private properties and raise property change event.
@@ -43,7 +43,7 @@ namespace TRMDesktopUI.ViewModels
         }
 
         //Getter and Setter for declared private properties and raise property change event.
-        public string ItemQuantity
+        public int ItemQuantity
         {
             get { return _itemQuantity; }
             set //Conditions can be applied here.
