@@ -18,6 +18,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
@@ -26,21 +27,26 @@
                    HorizontalAlignment="Center" FontSize="64" FontFamily="Segoe UI Light">
             Login Form
         </TextBlock>
-        
+
+        <!-- Error Message -->
+        <TextBlock x:Name="ErrorMessage" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0 0 0 20" MaxWidth="300" 
+                   TextWrapping="Wrap" Foreground="Red"
+                   Visibility="{Binding IsErrorVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
+
         <!-- User Name -->
-        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0 0 0 10" FontFamily="Segoe UI Light">
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0 0 5 10" FontFamily="Segoe UI Light">
             User Name:
         </TextBlock>
-        <TextBox x:Name="UserName" Grid.Row="1" Grid.Column="2" MinWidth="150" Margin="0 0 0 10"/>
+        <TextBox x:Name="UserName" Grid.Row="2" Grid.Column="2" MinWidth="350" Margin="0 0 0 10"/>
 
         <!-- Password -->
-        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" FontFamily="Segoe UI Light">
+        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0 0 5 10" FontFamily="Segoe UI Light">
             Password:
         </TextBlock>
-        <PasswordBox x:Name="Password" Grid.Row="2" Grid.Column="2" MinWidth="150" Margin="0 0 0 10"/>
+        <PasswordBox x:Name="Password" Grid.Row="3" Grid.Column="2" MinWidth="350" Margin="0 0 0 10"/>
         
         <!-- Login Button -->
-        <Button x:Name="LogIn" Grid.Row="3" Grid.Column="2" Margin="0 0 0 10" Padding="20 5" HorizontalAlignment="Right">
+        <Button x:Name="LogIn" Grid.Row="4" Grid.Column="2" Margin="0 0 0 10" Padding="20 5" HorizontalAlignment="Right">
             Log In
         </Button>
     </Grid>
