@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.Library.API;
+using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
@@ -20,12 +21,14 @@ namespace TRMDesktopUI.ViewModels
         private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
         private int _itemQuantity = 1;
         private IProductEndpoint _productEndpoint;
+        private IConfigHelper _configHelper;
         private ProductModel _selectedProduct;
 
         //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
-        public SalesViewModel(IProductEndpoint productEndpoint)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
         {
             _productEndpoint = productEndpoint;
+            _configHelper = configHelper;
         }
 
         //ListBox Products
@@ -69,14 +72,7 @@ namespace TRMDesktopUI.ViewModels
         {
             get
             {
-                decimal subTotal = 0;
-
-                foreach (var item in Cart)
-                {
-                    subTotal += (item.Product.RetailPrice * item.QuantityInCart);
-                }
-
-                return subTotal.ToString("C"); //returns in currency format
+                return CalculateSubTotal().ToString("C"); //returns in currency format
             }
         }
 
@@ -85,8 +81,7 @@ namespace TRMDesktopUI.ViewModels
         {
             get
             {
-                //TODO calculations
-                return "$0.00";
+                return CalculateTax().ToString("C");
             }
         }
 
@@ -95,8 +90,8 @@ namespace TRMDesktopUI.ViewModels
         {
             get
             {
-                //TODO calculations
-                return "$0.00";
+                decimal Total = CalculateSubTotal() + CalculateTax();
+                return Total.ToString("C");
             }
         }
 
@@ -144,6 +139,8 @@ namespace TRMDesktopUI.ViewModels
             SelectedProduct.QuantityInStock -= ItemQuantity;
             ItemQuantity = 1;
             NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
 
         //Button Checking RemoveFromCart.
@@ -211,5 +208,34 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
+        //Method for calculation of subtotal
+        private decimal CalculateSubTotal()
+        {
+            decimal subTotal = 0;
+
+            foreach (var item in Cart)
+            {
+                subTotal += (item.Product.RetailPrice * item.QuantityInCart);
+            }
+
+            return subTotal;
+        }
+
+        //Method for calculation of Tax
+        private decimal CalculateTax()
+        {
+            decimal taxAmount = 0;
+            decimal taxRate = _configHelper.GetTaxRate()/100;
+
+            foreach (var item in Cart)
+            {
+                if (item.Product.IsTaxable)
+                {
+                    taxAmount += (item.Product.RetailPrice * item.QuantityInCart * taxRate); 
+                }
+            }
+
+            return taxAmount;
+        }
     }
 }

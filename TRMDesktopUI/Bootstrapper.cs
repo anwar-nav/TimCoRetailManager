@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using TRMDesktopUI.Helpers;
 using TRMDesktopUI.Library.API;
+using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
 using TRMDesktopUI.ViewModels;
 
@@ -41,6 +42,7 @@ namespace TRMDesktopUI
         //Added Singleton for Window Manager and Event Aggregator based in caliburn.micro. for managing windows and passing event messages.
         //Added Singleton for APIHelper from UI.Library for managing instance of it.
         //Added Singleton for LoggedInUserModel from UI.Library for managing instance of it.
+        //Added Singleton for ConfigHelper from UI.Library for managing instance of it.
         //Added reflection (It's slow so string builder is better to use).
         protected override void Configure()
         {
@@ -51,6 +53,7 @@ namespace TRMDesktopUI
                 .Singleton<IWindowManager, WindowManager>() //Interface tied with implementation.
                 .Singleton<IEventAggregator, EventAggregator>() //Interface tied with implementation.
                 .Singleton<ILoggedInUserModel, LoggedInUserModel>() //Interface tied with implementation.
+                .Singleton<IConfigHelper, ConfigHelper>() //Interface tied with implementation.
                 .Singleton<IAPIHelper, APIHelper>(); //Interface tied with implementation.
 
             GetType().Assembly.GetTypes() //reflection gettype of running assembly and get all the types for our current instance.
