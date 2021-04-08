@@ -10,6 +10,9 @@ using TRMDataManger.Library.Models;
 
 namespace TRMDataManger.Controllers
 {
+    /// <summary>
+    /// User endpoint in API to process operations.
+    /// </summary>
     [Authorize]
     public class UserController : ApiController
     {
@@ -42,6 +45,7 @@ namespace TRMDataManger.Controllers
 
         //This will create UserModel and will get userId from Entity Framework Table and use that
         //Id in stored procedure to search user in User Table and get all the data of User.
+        [HttpGet]
         public UserModel GetById()
         {
             //This will get user id from entity framework user table.

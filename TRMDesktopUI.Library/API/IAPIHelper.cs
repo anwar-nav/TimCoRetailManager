@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.Library.API
@@ -8,6 +9,7 @@ namespace TRMDesktopUI.Library.API
     /// </summary>
     public interface IAPIHelper
     {
+        HttpClient ApiClient { get; }
         Task<AuthenticateUser> Authenticate(string username, string password);
         Task GetLoggedInUserInfo(string token);
     }

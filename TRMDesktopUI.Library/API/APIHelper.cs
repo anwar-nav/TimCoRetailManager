@@ -19,7 +19,7 @@ namespace TRMDesktopUI.Library.API
     public class APIHelper : IAPIHelper
     {
         //Declaring a private object ApiClient of type HTTPClient
-        private HttpClient apiClient { get; set; }
+        private HttpClient _apiClient { get; set; }
         //Declaring a private object LoggedInUserModel of type ILoggedInUserModel
         private ILoggedInUserModel _loggedInUser { get; set; }
 
@@ -31,6 +31,15 @@ namespace TRMDesktopUI.Library.API
             _loggedInUser = loggedIn;
         }
 
+        //This is a read only property to get _apiClient so that same instance could be called in other classes.
+        public HttpClient ApiClient
+        {
+            get
+            {
+                return _apiClient;
+            }
+        }
+
         //This will grab the API route and store in string variable.
         //Instantiate apiClient and configures it with Uri and Header value type i.e. in which format the response body should be.
         private void InitializeClient()
@@ -38,11 +47,11 @@ namespace TRMDesktopUI.Library.API
             //Getting API route string from App.config and storing it in string variable.
             string apiRoute = ConfigurationManager.AppSettings["apiRoute"];
 
-            apiClient = new HttpClient(); //Instantiating a new HTTP client.
-            apiClient.BaseAddress = new Uri(apiRoute); //Setting the Base Address of instantiated client.
-            apiClient.DefaultRequestHeaders.Accept.Clear(); //Clearing the Headers to be blank for fresh start.
+            _apiClient = new HttpClient(); //Instantiating a new HTTP client.
+            _apiClient.BaseAddress = new Uri(apiRoute); //Setting the Base Address of instantiated client.
+            _apiClient.DefaultRequestHeaders.Accept.Clear(); //Clearing the Headers to be blank for fresh start.
             //Adding Header value type to be json. it can be xml also.This will tell the response body should be in this format.
-            apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         //This method will send data asynchronously to api endpoint and in response will receive data
@@ -61,7 +70,7 @@ namespace TRMDesktopUI.Library.API
             //Creating a response message to receive data from API by using a PostAsync method in which the route(Uri)
             //and data being sent is given.
             //response received has content which will be stored in a variable named result.
-            using (HttpResponseMessage response = await apiClient.PostAsync("/Token", data))
+            using (HttpResponseMessage response = await _apiClient.PostAsync("/Token", data))
             {
                 if (response.IsSuccessStatusCode)
                 {
@@ -78,20 +87,20 @@ namespace TRMDesktopUI.Library.API
         //This method will get all the info of User Logged in and store it in LoggedInUserModel.
         public async Task GetLoggedInUserInfo(string token)
         {
+            _apiClient.DefaultRequestHeaders.Clear(); //Clearing the Headers to be blank for fresh start.
+            _apiClient.DefaultRequestHeaders.Accept.Clear(); //Clearing the Headers to be blank for fresh start.
+            //Adding Header value type to be json. it can be xml also.This will tell the response body should be in this format.
+            _apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //This creates a header with Authorization type and adds value in string format of Bearer token where token
+            //is the value received from AuthenticateUser class.
+            _apiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer { token }");
+
             //Creating a response message to receive data from API by using a GetAsync method in which the route(Uri)
             //and data being sent is given.
             //response received has content which will be mapped with _loggedInUser for mapping the object. Can be done
             //by automapper tool but here we are manually mapping it.
-            using (HttpResponseMessage response = await apiClient.GetAsync("/api/User"))
+            using (HttpResponseMessage response = await _apiClient.GetAsync("/api/User"))
             {
-                apiClient.DefaultRequestHeaders.Clear(); //Clearing the Headers to be blank for fresh start.
-                apiClient.DefaultRequestHeaders.Accept.Clear(); //Clearing the Headers to be blank for fresh start.
-                //Adding Header value type to be json. it can be xml also.This will tell the response body should be in this format.
-                apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //This creates a header with Authorization type and adds value in string format of Bearer token where token
-                //is the value received from AuthenticateUser class.
-                apiClient.DefaultRequestHeaders.Add("Authorization", $"bearer { token }");
-
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadAsAsync<LoggedInUserModel>();

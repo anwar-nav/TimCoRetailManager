@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMDesktopUI.Library.API;
+using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -14,13 +16,21 @@ namespace TRMDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         //Declared private properties.
-        private BindingList<string> _products;
-        private BindingList<string> _cart;
-        private int _itemQuantity;
+        private BindingList<ProductModel> _products;
+        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+        private int _itemQuantity = 1;
+        private IProductEndpoint _productEndpoint;
+        private ProductModel _selectedProduct;
+
+        //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
+        public SalesViewModel(IProductEndpoint productEndpoint)
+        {
+            _productEndpoint = productEndpoint;
+        }
 
         //ListBox Products
         //Getter and Setter for declared private properties and raise property change event.
-        public BindingList<string> Products
+        public BindingList<ProductModel> Products
         {
             get { return _products; }
             set //Conditions can be applied here.
@@ -32,7 +42,7 @@ namespace TRMDesktopUI.ViewModels
 
         //ListBox Cart
         //Getter and Setter for declared private properties and raise property change event.
-        public BindingList<string> Cart
+        public BindingList<CartItemModel> Cart
         {
             get { return _cart; }
             set //Conditions can be applied here.
@@ -50,6 +60,7 @@ namespace TRMDesktopUI.ViewModels
             {
                 _itemQuantity = value;
                 NotifyOfPropertyChange(() => ItemQuantity);
+                NotifyOfPropertyChange(() => CanAddToCart);
             }
         }
 
@@ -58,8 +69,14 @@ namespace TRMDesktopUI.ViewModels
         {
             get
             {
-                //TODO calculations
-                return "$0.00";
+                decimal subTotal = 0;
+
+                foreach (var item in Cart)
+                {
+                    subTotal += (item.Product.RetailPrice * item.QuantityInCart);
+                }
+
+                return subTotal.ToString("C"); //returns in currency format
             }
         }
 
@@ -83,23 +100,50 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        //Button Checking AddToCart.
+        //Button AddToCart toggling visibility validation
         public bool CanAddToCart //Property that gets.
         {
             get
             {
                 bool output = false;
 
-                //add something
+                if (ItemQuantity > 0 && SelectedProduct?.QuantityInStock >= ItemQuantity)
+                {
+                    output = true;
+                }
 
                 return output;
             }
         }
 
-        //Button AddToCart.
+        //This method will check first if an item selected already exists in cart and if it exists than it's existing
+        //quantityincart will be updated otherwise new item will be added to the cart.
+        //Then the selected product quantity will be deducted by the quantity added to the cart and item quantity box
+        //will be updated to 1.
+        //Then subtotal will be updated by raising event.
         public void AddToCart()
         {
-            //add something
+            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
+            if (existingItem != null)
+            {
+                existingItem.QuantityInCart += ItemQuantity;
+                //Hack - There should be a better way of refreshing the cart display
+                Cart.Remove(existingItem);
+                Cart.Add(existingItem);
+            }
+            else
+            {
+                CartItemModel item = new CartItemModel
+                {
+                    Product = SelectedProduct, //property of CartItemModel.
+                    QuantityInCart = ItemQuantity //property of CartItemModel.
+                };
+                Cart.Add(item);
+            }
+            
+            SelectedProduct.QuantityInStock -= ItemQuantity;
+            ItemQuantity = 1;
+            NotifyOfPropertyChange(() => SubTotal);
         }
 
         //Button Checking RemoveFromCart.
@@ -139,5 +183,33 @@ namespace TRMDesktopUI.ViewModels
         {
             //add something
         }
+
+        //This will call the GetAll() method from ProductEndpoint class and store the received data from API into a variable
+        //and then this variable will be used for instantiation of the ListBox binded with data.
+        private async Task LoadProducts()
+        {
+            var productlist = await _productEndpoint.GetAll();
+            Products = new BindingList<ProductModel>(productlist);
+        }
+
+        //This is overriding the default and creating an await call to LoadProducts method.
+        protected override async void OnViewLoaded(object view)
+        {
+            base.OnViewLoaded(view);
+            await LoadProducts();
+        }
+
+        //Getter and Setter for declared private properties and raise property change event.
+        public ProductModel SelectedProduct
+        {
+            get { return _selectedProduct; }
+            set
+            {
+                _selectedProduct = value;
+                NotifyOfPropertyChange(() => SelectedProduct);
+                NotifyOfPropertyChange(() => CanAddToCart);
+            }
+        }
+
     }
 }

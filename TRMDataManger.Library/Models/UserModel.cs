@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TRMDataManger.Library.Models
 {
     /// <summary>
-    /// This has the properties of UserData (same as column names of UserData Table).
+    /// This has the properties of User Table (same as column names of User Table).
     /// </summary>
     public class UserModel
     {
