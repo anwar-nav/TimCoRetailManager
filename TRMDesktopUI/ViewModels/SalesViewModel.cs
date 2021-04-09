@@ -27,6 +27,7 @@ namespace TRMDesktopUI.ViewModels
         private ISaleEndpoint _saleEndpoint;
         private IMapper _mapper;
         private ProductDisplayModel _selectedProduct;
+        private CartItemDisplayModel _selectedCartItem;
 
         //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
         public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, 
@@ -129,9 +130,6 @@ namespace TRMDesktopUI.ViewModels
             if (existingItem != null)
             {
                 existingItem.QuantityInCart += ItemQuantity;
-                //Hack - There should be a better way of refreshing the cart display
-                Cart.Remove(existingItem);
-                Cart.Add(existingItem);
             }
             else
             {
@@ -149,16 +147,20 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
             NotifyOfPropertyChange(() => CanCheckOut);
+            //NotifyOfPropertyChange(() => CanRemoveFromCart);
         }
 
-        //Button Checking RemoveFromCart.
+        //Button RemoveFromCart toggling visibility validation.
         public bool CanRemoveFromCart //Property that gets.
         {
             get
             {
                 bool output = false;
 
-                //add something
+                if (SelectedCartItem != null && SelectedCartItem.QuantityInCart > 0)
+                {
+                    output = true;
+                }
 
                 return output;
             }
@@ -167,7 +169,22 @@ namespace TRMDesktopUI.ViewModels
         //Button RemoveFromCart.
         public void RemoveFromCart()
         {
-            //add something
+            SelectedCartItem.Product.QuantityInStock += 1;
+
+            if (SelectedCartItem.QuantityInCart > 1)
+            {
+                SelectedCartItem.QuantityInCart -= 1;
+            }
+            else
+            {
+                Cart.Remove(SelectedCartItem);
+            }
+
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
         }
 
         //Button CheckOut toggling visibility validation
@@ -229,6 +246,18 @@ namespace TRMDesktopUI.ViewModels
                 _selectedProduct = value;
                 NotifyOfPropertyChange(() => SelectedProduct);
                 NotifyOfPropertyChange(() => CanAddToCart);
+            }
+        }
+
+        //Getter and Setter for declared private properties and raise property change event.
+        public CartItemDisplayModel SelectedCartItem
+        {
+            get { return _selectedCartItem; }
+            set
+            {
+                _selectedCartItem = value;
+                NotifyOfPropertyChange(() => SelectedCartItem);
+                NotifyOfPropertyChange(() => CanRemoveFromCart);
             }
         }
 
