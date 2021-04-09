@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using TRMDesktopUI.Library.API;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
+using TRMDesktopUI.Models;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -17,25 +19,28 @@ namespace TRMDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         //Declared private properties.
-        private BindingList<ProductModel> _products;
-        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+        private BindingList<ProductDisplayModel> _products;
+        private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
         private int _itemQuantity = 1;
         private IProductEndpoint _productEndpoint;
         private IConfigHelper _configHelper;
         private ISaleEndpoint _saleEndpoint;
-        private ProductModel _selectedProduct;
+        private IMapper _mapper;
+        private ProductDisplayModel _selectedProduct;
 
         //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, 
+                              ISaleEndpoint saleEndpoint, IMapper mapper)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
+            _mapper = mapper;
         }
 
         //ListBox Products
         //Getter and Setter for declared private properties and raise property change event.
-        public BindingList<ProductModel> Products
+        public BindingList<ProductDisplayModel> Products
         {
             get { return _products; }
             set //Conditions can be applied here.
@@ -47,7 +52,7 @@ namespace TRMDesktopUI.ViewModels
 
         //ListBox Cart
         //Getter and Setter for declared private properties and raise property change event.
-        public BindingList<CartItemModel> Cart
+        public BindingList<CartItemDisplayModel> Cart
         {
             get { return _cart; }
             set //Conditions can be applied here.
@@ -120,7 +125,7 @@ namespace TRMDesktopUI.ViewModels
         //Then subtotal, tax and total will be updated by raising event.
         public void AddToCart()
         {
-            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
+            CartItemDisplayModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
             if (existingItem != null)
             {
                 existingItem.QuantityInCart += ItemQuantity;
@@ -130,10 +135,10 @@ namespace TRMDesktopUI.ViewModels
             }
             else
             {
-                CartItemModel item = new CartItemModel
+                CartItemDisplayModel item = new CartItemDisplayModel
                 {
-                    Product = SelectedProduct, //property of CartItemModel.
-                    QuantityInCart = ItemQuantity //property of CartItemModel.
+                    Product = SelectedProduct, //property of CartItemDisplayModel.
+                    QuantityInCart = ItemQuantity //property of CartItemDisplayModel.
                 };
                 Cart.Add(item);
             }
@@ -199,11 +204,13 @@ namespace TRMDesktopUI.ViewModels
         }
 
         //This will call the GetAll() method from ProductEndpoint class and store the received data from API into a variable
-        //and then this variable will be used for instantiation of the ListBox binded with data.
+        //and then this variable will be used for mapping into display model and store in another variable and than this
+        // variable will be binded to Listbox with data.
         private async Task LoadProducts()
         {
             var productlist = await _productEndpoint.GetAll();
-            Products = new BindingList<ProductModel>(productlist);
+            var products = _mapper.Map<List<ProductDisplayModel>>(productlist);
+            Products = new BindingList<ProductDisplayModel>(products);
         }
 
         //This is overriding the default and creating an await call to LoadProducts method.
@@ -214,7 +221,7 @@ namespace TRMDesktopUI.ViewModels
         }
 
         //Getter and Setter for declared private properties and raise property change event.
-        public ProductModel SelectedProduct
+        public ProductDisplayModel SelectedProduct
         {
             get { return _selectedProduct; }
             set

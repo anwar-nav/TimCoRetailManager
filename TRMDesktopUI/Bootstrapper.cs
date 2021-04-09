@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using TRMDesktopUI.Helpers;
 using TRMDesktopUI.Library.API;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
+using TRMDesktopUI.Models;
 using TRMDesktopUI.ViewModels;
 
 namespace TRMDesktopUI
@@ -35,9 +37,24 @@ namespace TRMDesktopUI
             "PasswordChanged");
         }
 
+        //This will configure the mapping of models using automapper
+        private IMapper ConfigureAutoMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, CartItemDisplayModel>();
+            });
+
+            var output = config.CreateMapper();
+
+            return output;
+        }
+        
         //This is where actual instantiation happens or container knows what to connect to what. The container holds the 
         //instance of itself to pass out when SimpleContainer is called. This container is required in order to manipulate
         //or to change or to get information out of it besides from constructor. This configure runs once at start of application.
+        //Added ConfigureAutoMapper to container.
         //Added PerRequest for instances of ProductEndpoint class.
         //Added PerRequest for instances of SaleEndpoint class.
         //Added Singleton for Window Manager and Event Aggregator based in caliburn.micro. for managing windows and passing event messages.
@@ -47,6 +64,8 @@ namespace TRMDesktopUI
         //Added reflection (It's slow so string builder is better to use).
         protected override void Configure()
         {
+            _container.Instance(ConfigureAutoMapper());
+
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>() //per request instance.
                 .PerRequest<ISaleEndpoint, SaleEndpoint>(); //per request instance.
