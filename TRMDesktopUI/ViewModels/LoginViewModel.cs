@@ -16,8 +16,19 @@ namespace TRMDesktopUI.ViewModels
     public class LoginViewModel : Screen
     {
         //Declared private properties.
-        private string _username;
-        private string _password;
+        private string _username
+#if DEBUG
+         = "anwar.nav@yandex.com";
+#else
+        ;
+#endif
+
+        private string _password
+#if DEBUG
+            = "123Asd.";
+#else
+        ;
+#endif
         private string _errorMessage;
         private IAPIHelper _apiHelper;
         private IEventAggregator _events;

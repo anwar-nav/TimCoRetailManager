@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TRMDesktopUI.Library.Helpers
+namespace TRMDataManger.Library
 {
     /// <summary>
-    /// This will get the tax rate stored in App.Config of UI
+    /// This will get the tax rate stored in Web.Config of API
     /// </summary>
-    public class ConfigHelper : IConfigHelper
+    public class ConfigHelper
     {
-        public decimal GetTaxRate()
+        public static decimal GetTaxRate()
         {
             string rateText = ConfigurationManager.AppSettings["taxRate"];
 

@@ -39,6 +39,7 @@ namespace TRMDesktopUI
         //instance of itself to pass out when SimpleContainer is called. This container is required in order to manipulate
         //or to change or to get information out of it besides from constructor. This configure runs once at start of application.
         //Added PerRequest for instances of ProductEndpoint class.
+        //Added PerRequest for instances of SaleEndpoint class.
         //Added Singleton for Window Manager and Event Aggregator based in caliburn.micro. for managing windows and passing event messages.
         //Added Singleton for APIHelper from UI.Library for managing instance of it.
         //Added Singleton for LoggedInUserModel from UI.Library for managing instance of it.
@@ -47,7 +48,8 @@ namespace TRMDesktopUI
         protected override void Configure()
         {
             _container.Instance(_container)
-                .PerRequest<IProductEndpoint, ProductEndpoint>(); //per request instance.
+                .PerRequest<IProductEndpoint, ProductEndpoint>() //per request instance.
+                .PerRequest<ISaleEndpoint, SaleEndpoint>(); //per request instance.
 
             _container
                 .Singleton<IWindowManager, WindowManager>() //Interface tied with implementation.

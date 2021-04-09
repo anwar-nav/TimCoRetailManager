@@ -22,13 +22,15 @@ namespace TRMDesktopUI.ViewModels
         private int _itemQuantity = 1;
         private IProductEndpoint _productEndpoint;
         private IConfigHelper _configHelper;
+        private ISaleEndpoint _saleEndpoint;
         private ProductModel _selectedProduct;
 
         //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
+            _saleEndpoint = saleEndpoint;
         }
 
         //ListBox Products
@@ -115,7 +117,7 @@ namespace TRMDesktopUI.ViewModels
         //quantityincart will be updated otherwise new item will be added to the cart.
         //Then the selected product quantity will be deducted by the quantity added to the cart and item quantity box
         //will be updated to 1.
-        //Then subtotal will be updated by raising event.
+        //Then subtotal, tax and total will be updated by raising event.
         public void AddToCart()
         {
             CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
@@ -141,6 +143,7 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         //Button Checking RemoveFromCart.
@@ -162,23 +165,37 @@ namespace TRMDesktopUI.ViewModels
             //add something
         }
 
-        //Button Checking CheckOut.
+        //Button CheckOut toggling visibility validation
         public bool CanCheckOut //Property that gets.
         {
             get
             {
                 bool output = false;
 
-                //add something
+                if (Cart.Count > 0)
+                {
+                    output = true;
+                }
 
                 return output;
             }
         }
 
         //Button CheckOut.
-        public void CheckOut()
+        public async Task CheckOut()
         {
-            //add something
+            SaleModel sale = new SaleModel();
+
+            foreach (var item in Cart)
+            {
+                sale.SaleDetails.Add(new SaleDetailModel
+                {
+                    ProductId = item.Product.Id,
+                    Quantity = item.QuantityInCart
+                });
+            }
+
+            await _saleEndpoint.PostSale(sale);
         }
 
         //This will call the GetAll() method from ProductEndpoint class and store the received data from API into a variable

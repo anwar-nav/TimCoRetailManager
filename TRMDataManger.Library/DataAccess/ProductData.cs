@@ -25,5 +25,17 @@ namespace TRMDataManger.Library.DataAccess
 
             return output;
         }
+
+        //This method will return the product details by id.
+        public ProductModel GetProductsById(int productId)
+        {
+            SQLDataAccess sql = new SQLDataAccess();
+
+            //Beneficial for Unit testing.
+            var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { id = productId }, "TRMData").FirstOrDefault();
+
+            return output;
+        }
+
     }
 }
