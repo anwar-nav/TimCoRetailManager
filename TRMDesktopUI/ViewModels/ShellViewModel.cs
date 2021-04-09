@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.EventModels;
+using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -16,9 +17,11 @@ namespace TRMDesktopUI.ViewModels
     {
         //An object of type IEventAggregator is declared with access modifier as private.
         //An object of type SalesViewModel is declared with access modifier as private.
+        //An object of type ILogInUserModel is declared with access modifier as private.
         //It is a type of holder.
         private IEventAggregator _events;
         private SalesViewModel _salesVM;
+        private ILoggedInUserModel _user;
 
         //Constructor to load LoginViewModel and bring it upfront using ActivateItem method from
         //base class Conductor. This is using constructor injection.
@@ -31,20 +34,50 @@ namespace TRMDesktopUI.ViewModels
         //In ActivateItem method everytime a new instance of LoginViewModel will be provided by container. This is required
         //because when LoginViewModel will get Activated again it will hold the previous values of username and password
         //so a new instance is required.
-        public ShellViewModel(IEventAggregator events, SalesViewModel salesVM)
+        public ShellViewModel(IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user)
         {
             _events = events; //setting private properties
             _salesVM = salesVM; //setting private properties
+            _user = user; //setting private properties
 
             _events.Subscribe(this); //Subscribing to the event.
 
             ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
         }
 
+        public bool IsLoggedIn
+        {
+            get
+            {
+                bool output = false;
+
+                if (string.IsNullOrWhiteSpace(_user.Token) == false)
+                {
+                    output = true;
+                }
+
+                return output;
+            }
+        }
+
         //This method will be called when an event of LogOnEvent is raised.
         public void Handle(LogOnEvent message)
         {
             ActivateItem(_salesVM); //Avtivating the SalesView.
+            NotifyOfPropertyChange(() => IsLoggedIn);
+        }
+
+        //This will close the application.
+        public void ExitApplication()
+        {
+            TryClose();
+        }
+
+        public void LogOut()
+        {
+            _user.LogOfUser();
+            ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
+            NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }
 }
