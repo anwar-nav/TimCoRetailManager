@@ -32,6 +32,17 @@ namespace TRMDataManger.Controllers
             data.SaveSale(sale, userId);
         }
 
+        /// <summary>
+        /// This gets the sales report by using the method specified in class library.
+        /// </summary>
+        /// <returns></returns>
+        [Route("GetSalesReport")]
+        public List<SaleReportModel> GetSalesReport()
+        {
+            SaleData data = new SaleData();
+            return data.GetSaleReport();
+        }
+
         //// GET api/<controller>
         //public IEnumerable<string> Get()
         //{

@@ -105,6 +105,7 @@ namespace TRMDataManger.Library.DataAccess
                 {
                     //This rolls back the transaction if any of the insert is unsuccessfull.
                     sql.RollbackTransaction();
+                    throw;
                 }
             }
 
@@ -125,6 +126,16 @@ namespace TRMDataManger.Library.DataAccess
             //    item.SaleId = saleid;
             //    sql.SaveData("dbo.spSaleDetail_Insert", item, "TRMData");
             //}
+        }
+
+        //This call the spSale_SaleReport and return the data.
+        public List<SaleReportModel> GetSaleReport()
+        {
+            SQLDataAccess sql = new SQLDataAccess();
+
+            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { }, "TRMData");
+
+            return output;
         }
     }
 }
