@@ -84,6 +84,12 @@ namespace TRMDesktopUI.Library.API
             }
         }
 
+        //This clears the header when logged of.
+        public void LogOfUser()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
+
         //This method will get all the info of User Logged in and store it in LoggedInUserModel.
         public async Task GetLoggedInUserInfo(string token)
         {

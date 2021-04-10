@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMDesktopUI.EventModels;
+using TRMDesktopUI.Library.API;
 using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
@@ -18,10 +19,12 @@ namespace TRMDesktopUI.ViewModels
         //An object of type IEventAggregator is declared with access modifier as private.
         //An object of type SalesViewModel is declared with access modifier as private.
         //An object of type ILogInUserModel is declared with access modifier as private.
+        //An object of type IAPIHelper is declared with access modifier as private.
         //It is a type of holder.
         private IEventAggregator _events;
         private SalesViewModel _salesVM;
         private ILoggedInUserModel _user;
+        private IAPIHelper _apiHelper;
 
         //Constructor to load LoginViewModel and bring it upfront using ActivateItem method from
         //base class Conductor. This is using constructor injection.
@@ -34,12 +37,12 @@ namespace TRMDesktopUI.ViewModels
         //In ActivateItem method everytime a new instance of LoginViewModel will be provided by container. This is required
         //because when LoginViewModel will get Activated again it will hold the previous values of username and password
         //so a new instance is required.
-        public ShellViewModel(IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user)
+        public ShellViewModel(IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user, IAPIHelper aPIHelper)
         {
             _events = events; //setting private properties
             _salesVM = salesVM; //setting private properties
             _user = user; //setting private properties
-
+            _apiHelper = aPIHelper; //setting private properties
             _events.Subscribe(this); //Subscribing to the event.
 
             ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
@@ -75,7 +78,8 @@ namespace TRMDesktopUI.ViewModels
 
         public void LogOut()
         {
-            _user.LogOfUser();
+            _user.ResetLoggedInUserModel();
+            _apiHelper.LogOfUser();
             ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
             NotifyOfPropertyChange(() => IsLoggedIn);
         }

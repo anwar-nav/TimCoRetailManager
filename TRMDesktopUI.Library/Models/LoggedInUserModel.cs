@@ -20,7 +20,7 @@ namespace TRMDesktopUI.Library.Models
         public DateTime CreatedDate { get; set; }
 
         //This will clear all the properties.
-        public void LogOfUser()
+        public void ResetLoggedInUserModel()
         {
             Token = "";
             Id = "";
