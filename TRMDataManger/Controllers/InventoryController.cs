@@ -12,6 +12,7 @@ namespace TRMDataManger.Controllers
     /// <summary>
     /// Inventory Endpoint in API to process operations.
     /// </summary>
+    [Authorize]
     public class InventoryController : ApiController
     {
         /// <summary>
@@ -19,6 +20,7 @@ namespace TRMDataManger.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [Authorize(Roles = "Admin, Manager")]
         public List<InventoryModel> Get()
         {
             InventoryData data = new InventoryData();
@@ -29,6 +31,8 @@ namespace TRMDataManger.Controllers
         /// This posts the inventory data by using the method specified in class library.
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Manager")]
         public void Post(InventoryModel item)
         {
             InventoryData data = new InventoryData();

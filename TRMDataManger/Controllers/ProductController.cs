@@ -13,7 +13,7 @@ namespace TRMDataManger.Controllers
     /// <summary>
     /// Product endpoint in API to process operations.
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = "Cashier")]
     public class ProductController : ApiController
     {
         // GET api/<controller>

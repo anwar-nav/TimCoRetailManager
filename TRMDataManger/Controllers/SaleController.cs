@@ -22,6 +22,7 @@ namespace TRMDataManger.Controllers
         /// </summary>
         /// <param name="sale">This will hold the details of sales provided by UI in form of SaleModel.</param>
         [HttpPost]
+        [Authorize(Roles = "Cashier")]
         public void Post(SaleModel sale)
         {
             //Instantiating this class in order to access the savesale method.
@@ -37,8 +38,19 @@ namespace TRMDataManger.Controllers
         /// </summary>
         /// <returns></returns>
         [Route("GetSalesReport")]
+        [Authorize(Roles = "Admin, Manager")]
         public List<SaleReportModel> GetSalesReport()
         {
+            if (RequestContext.Principal.IsInRole("Admin"))
+            {
+                // Do admin stuff
+            }
+            else if (RequestContext.Principal.IsInRole("Manager"))
+            {
+                // Do manager stuff
+            }
+
+
             SaleData data = new SaleData();
             return data.GetSaleReport();
         }
