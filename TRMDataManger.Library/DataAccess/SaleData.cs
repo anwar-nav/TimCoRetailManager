@@ -74,22 +74,57 @@ namespace TRMDataManger.Library.DataAccess
 
             sale.Total = sale.SubTotal + sale.Tax;
 
-            //This calls the savedata method in this library and gives the name of store procedure to use along with
-            //populated sale data and name of database.
-            SQLDataAccess sql = new SQLDataAccess();
-            sql.SaveData("dbo.spSale_Insert", sale, "TRMData");
-
-            //This gets the sales id of the sales just added in database. This is required because in saledetail the
-            //saleid is foreign key to the id present in sale table
-            int saleid = sql.LoadData<int, dynamic>("dbo.spSale_Lookup", new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }, "TRMData").FirstOrDefault();
-
-            //This adds all items of list populated above of sales items to the saledetail table based on sale id.
-            //For multiple calls to database look into advance dapper.
-            foreach (var item in details)
+            //This insertion is by way of transaction.
+            using (SQLDataAccess sql = new SQLDataAccess())
             {
-                item.SaleId = saleid;
-                sql.SaveData("dbo.spSaleDetail_Insert", item, "TRMData");
+                try
+                {
+                    //This starts the transaction.
+                    sql.StartTransaction("TRMData");
+
+                    //This calls the savedata method in this library and gives the name of store procedure to use along with
+                    //populated sale data.
+                    sql.SaveDataInTransaction("dbo.spSale_Insert", sale);
+
+                    //This gets the sales id of the sales just added in database. This is required because in saledetail the
+                    //saleid is foreign key to the id present in sale table
+                    int saleid = sql.LoadDataInTransaction<int, dynamic>("dbo.spSale_Lookup", new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
+
+                    //This adds all items of list populated above of sales items to the saledetail table based on sale id.
+                    //For multiple calls to database look into advance dapper.
+                    foreach (var item in details)
+                    {
+                        item.SaleId = saleid;
+                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
+                    }
+
+                    //This commits the transaction.
+                    sql.CommitTransaction();
+                }
+                catch
+                {
+                    //This rolls back the transaction if any of the insert is unsuccessfull.
+                    sql.RollbackTransaction();
+                }
             }
+
+            ////This was the individual way inserting sale.
+            ////This calls the savedata method in this library and gives the name of store procedure to use along with
+            ////populated sale data and name of database.
+            //SQLDataAccess sql = new SQLDataAccess();
+            //sql.SaveData("dbo.spSale_Insert", sale, "TRMData");
+
+            ////This gets the sales id of the sales just added in database. This is required because in saledetail the
+            ////saleid is foreign key to the id present in sale table
+            //int saleid = sql.LoadData<int, dynamic>("dbo.spSale_Lookup", new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }, "TRMData").FirstOrDefault();
+
+            ////This adds all items of list populated above of sales items to the saledetail table based on sale id.
+            ////For multiple calls to database look into advance dapper.
+            //foreach (var item in details)
+            //{
+            //    item.SaleId = saleid;
+            //    sql.SaveData("dbo.spSaleDetail_Insert", item, "TRMData");
+            //}
         }
     }
 }

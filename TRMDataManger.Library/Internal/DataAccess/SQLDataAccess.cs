@@ -13,8 +13,11 @@ namespace TRMDataManger.Library.Internal.DataAccess
     /// <summary>
     /// This will access database and have generic methods for loading and saving data.
     /// </summary>
-    internal class SQLDataAccess
+    internal class SQLDataAccess : IDisposable
     {
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
+
         //This method will take the name of connection as parameter and return connection string.
         public string GetConnectionString(string name)
         {
@@ -50,5 +53,55 @@ namespace TRMDataManger.Library.Internal.DataAccess
             }
         }
 
+        //This generic method is synchronous and will load Transaction in type T list fetched from database using Dapper.
+        public List<T> LoadDataInTransaction<T, U>(string storedProcedure, U parameters)
+        {
+            List<T> rows = _connection.Query<T>(storedProcedure, parameters,
+                commandType: CommandType.StoredProcedure, transaction: _transaction).ToList();
+            return rows;
+        }
+
+        //This generic method is synchronous and will save transacion in database using Dapper.
+        public void SaveDataInTransaction<T>(string storedProcedure, T parameters)
+        {
+            _connection.Execute(storedProcedure, parameters, commandType: CommandType.StoredProcedure,
+                transaction: _transaction);
+        }
+
+
+        //This will create connection and start the transaction.
+        public void StartTransaction(string connectionStringName)
+        {
+            //Connection string of database.
+            string connectionString = GetConnectionString(connectionStringName);
+            
+            //Sql connection is made.
+            _connection = new SqlConnection(connectionString);
+
+            //Open the connection
+            _connection.Open();
+
+            //Transaction is started.
+            _transaction = _connection.BeginTransaction();
+        }
+
+        //This will commit the transaction and close the connection.
+        public void CommitTransaction()
+        {
+            _transaction?.Commit();
+            _connection.Close();
+        }
+
+        //This will rollback the transaction and close the connection.
+        public void RollbackTransaction()
+        {
+            _transaction.Rollback();
+            _connection.Close();
+        }
+
+        public void Dispose()
+        {
+            CommitTransaction();
+        }
     }
 }
