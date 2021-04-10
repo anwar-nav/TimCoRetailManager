@@ -3,9 +3,11 @@ using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using TRMDesktopUI.Library.API;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
@@ -26,17 +28,21 @@ namespace TRMDesktopUI.ViewModels
         private IConfigHelper _configHelper;
         private ISaleEndpoint _saleEndpoint;
         private IMapper _mapper;
+        private readonly StatusInfoViewModel _status;
+        private readonly IWindowManager _windowManager;
         private ProductDisplayModel _selectedProduct;
         private CartItemDisplayModel _selectedCartItem;
 
         //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
         public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, 
-                              ISaleEndpoint saleEndpoint, IMapper mapper)
+                              ISaleEndpoint saleEndpoint, IMapper mapper, StatusInfoViewModel status, IWindowManager windowManager)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
             _mapper = mapper;
+            _status = status;
+            _windowManager = windowManager;
         }
 
         //ListBox Products
@@ -245,7 +251,34 @@ namespace TRMDesktopUI.ViewModels
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts();
+            try
+            {
+                await LoadProducts();
+            }
+            catch (Exception ex)
+            {
+                //These are settings of dialogbox.
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "Sysem Error";
+
+                //var info = IoC.Get<StatusInfoViewModel>(); for instance of viewmodel instead of constructor injection.
+
+                if (ex.Message == "Unauthorized")
+                {
+                    //This is setting the values of StatusInfoViewModel.
+                    _status.UpdateMessage("Unauthorized", "You do not have permission to interact with Sales Form.");
+                    _windowManager.ShowDialog(_status, null, settings); //This will bring StatusInfoview as dialogbox
+                }
+                else
+                {
+                    //This is setting the values of StatusInfoViewModel.
+                    _status.UpdateMessage("Fatal Exception", ex.Message);
+                    _windowManager.ShowDialog(_status, null, settings); //This will bring StatusInfoview as dialogbox
+                }
+                TryClose();
+            }
         }
 
         //Getter and Setter for declared private properties and raise property change event.
