@@ -76,12 +76,18 @@ namespace TRMDesktopUI.ViewModels
             TryClose();
         }
 
+        //This will logout.
         public void LogOut()
         {
             _user.ResetLoggedInUserModel();
             _apiHelper.LogOfUser();
             ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
             NotifyOfPropertyChange(() => IsLoggedIn);
+        }
+
+        public void UserManagement()
+        {
+            ActivateItem(IoC.Get<UserDisplayViewModel>()); //Activating new instance every time.
         }
     }
 }

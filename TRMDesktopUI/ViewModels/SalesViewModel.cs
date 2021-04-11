@@ -33,7 +33,7 @@ namespace TRMDesktopUI.ViewModels
         private ProductDisplayModel _selectedProduct;
         private CartItemDisplayModel _selectedCartItem;
 
-        //This constructor is pulling in IProductEndpoint and storing in _productEndpoint for the life span of this class.
+        //This constructor is pulling in Interfaces and storing in private variables for the life span of this class.
         public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, 
                               ISaleEndpoint saleEndpoint, IMapper mapper, StatusInfoViewModel status, IWindowManager windowManager)
         {
