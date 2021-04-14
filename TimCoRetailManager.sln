@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMDataManger", "TRMDataManger\TRMDataManger.csproj", "{9EA7BE66-AC1C-4B38-980A-BC660AD2716C}"
 EndProject
@@ -9,7 +9,7 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TRMData", "TRMData\TRMData.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMDesktopUI", "TRMDesktopUI\TRMDesktopUI.csproj", "{AE609A07-3775-4DAA-8342-D49E352B58F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMDataManger.Library", "TRMDataManger.Library\TRMDataManger.Library.csproj", "{46E8D247-7EC1-45ED-B1AC-368E3CA04096}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRMDataManger.Library", "TRMDataManger.Library\TRMDataManger.Library.csproj", "{46E8D247-7EC1-45ED-B1AC-368E3CA04096}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRMDesktopUI.Library", "TRMDesktopUI.Library\TRMDesktopUI.Library.csproj", "{68A1922C-3704-427D-B503-31E4148C5138}"
 EndProject
@@ -28,8 +28,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Net Framework Api", ".Net Framework Api", "{52160FE2-F602-41D7-8B0A-DE2621F116C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Net Core", ".Net Core", "{710254CC-7D81-4489-88B3-20899BE6DABA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMApi", "TRMApi\TRMApi.csproj", "{1F331F1A-4C14-45C4-BCFC-B13ACECC307A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +57,6 @@ Global
 		{68A1922C-3704-427D-B503-31E4148C5138}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68A1922C-3704-427D-B503-31E4148C5138}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68A1922C-3704-427D-B503-31E4148C5138}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F331F1A-4C14-45C4-BCFC-B13ACECC307A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F331F1A-4C14-45C4-BCFC-B13ACECC307A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F331F1A-4C14-45C4-BCFC-B13ACECC307A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F331F1A-4C14-45C4-BCFC-B13ACECC307A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,7 +72,6 @@ Global
 		{848A167F-94E1-4FA7-9DB0-0D9FCAC5EEC0} = {FFAB48A8-95FE-4506-B8C6-025DA15AA6F0}
 		{52160FE2-F602-41D7-8B0A-DE2621F116C2} = {EB6B5FB4-D811-4B18-8531-6D7EDEF6AA31}
 		{710254CC-7D81-4489-88B3-20899BE6DABA} = {EB6B5FB4-D811-4B18-8531-6D7EDEF6AA31}
-		{1F331F1A-4C14-45C4-BCFC-B13ACECC307A} = {710254CC-7D81-4489-88B3-20899BE6DABA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {226D4CBF-7763-488C-A1BD-9ED9E514CBC7}
