@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using TRMDataManger.Library.DataAccess;
 using TRMDataManger.Library.Models;
 
@@ -18,6 +19,13 @@ namespace TRMApi.Controllers
     [ApiController]
     public class SaleController : ControllerBase
     {
+        private readonly IConfiguration _config;
+
+        public SaleController(IConfiguration config)
+        {
+            _config = config;
+        }
+
         /// <summary>
         /// This posts the sale to database by using the method specified in class library.
         /// </summary>
@@ -27,7 +35,7 @@ namespace TRMApi.Controllers
         public void Post(SaleModel sale)
         {
             //Instantiating this class in order to access the savesale method.
-            SaleData data = new SaleData();
+            SaleData data = new SaleData(_config);
             //This will get user id from entity framework user table.
             string userId = User.FindFirst(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
 
@@ -53,7 +61,7 @@ namespace TRMApi.Controllers
             //}
 
 
-            SaleData data = new SaleData();
+            SaleData data = new SaleData(_config);
             return data.GetSaleReport();
         }
 

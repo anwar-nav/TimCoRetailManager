@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using TRMDataManger.Library.Internal.DataAccess;
 using TRMDataManger.Library.Models;
 
@@ -13,11 +14,18 @@ namespace TRMDataManger.Library.DataAccess
     /// </summary>
     public class SaleData
     {
+        private readonly IConfiguration _config;
+
+        public SaleData(IConfiguration config)
+        {
+            _config = config;
+        }
+
         //This method is used to store sale and sale detail data into database.
         public void SaveSale(SaleModel saleInfo, string cashierId)
         {
             List<SaleDetailDBModel> details = new List<SaleDetailDBModel>();
-            ProductData products = new ProductData(); // for getting the productId.
+            ProductData products = new ProductData(_config); // for getting the productId.
             var taxRate = ConfigHelper.GetTaxRate()/100; //for getting taxrate from API web.config.
 
 
@@ -75,7 +83,7 @@ namespace TRMDataManger.Library.DataAccess
             sale.Total = sale.SubTotal + sale.Tax;
 
             //This insertion is by way of transaction.
-            using (SQLDataAccess sql = new SQLDataAccess())
+            using (SQLDataAccess sql = new SQLDataAccess(_config))
             {
                 try
                 {
@@ -131,7 +139,7 @@ namespace TRMDataManger.Library.DataAccess
         //This call the spSale_SaleReport and return the data.
         public List<SaleReportModel> GetSaleReport()
         {
-            SQLDataAccess sql = new SQLDataAccess();
+            SQLDataAccess sql = new SQLDataAccess(_config);
 
             var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { }, "TRMData");
 

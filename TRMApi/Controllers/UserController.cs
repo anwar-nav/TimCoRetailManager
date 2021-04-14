@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using TRMApi.Data;
 using TRMApi.Models;
 using TRMDataManger.Library.DataAccess;
@@ -23,11 +24,15 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _config;
 
-        public UserController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public UserController(ApplicationDbContext context, 
+                                UserManager<IdentityUser> userManager, 
+                                IConfiguration config)
         {
             _context = context;
             _userManager = userManager;
+            _config = config;
         }
 
         //This will create UserModel and will get userId from Entity Framework Table and use that
@@ -38,7 +43,7 @@ namespace TRMApi.Controllers
             //This will get user id from entity framework user table using Entity Framework.
             string userId = User.FindFirst(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
             //This will create an instance of UserData class from Class Library.
-            UserData data = new UserData();
+            UserData data = new UserData(_config);
             //This will return the data.
             return data.GetUserById(userId).First();
         }

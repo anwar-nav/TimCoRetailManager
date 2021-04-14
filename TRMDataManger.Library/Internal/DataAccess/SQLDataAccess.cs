@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,12 +19,23 @@ namespace TRMDataManger.Library.Internal.DataAccess
         private IDbConnection _connection;
         private IDbTransaction _transaction;
         private bool isClosed = false;
+        private readonly IConfiguration _config;
+
+        //This dependency injection is done to access the GetConnectionString method for getting the 
+        //connection string from appsettings.json
+        public SQLDataAccess(IConfiguration config)
+        {
+            _config = config;
+        }
 
         //This method will take the name of connection as parameter and return connection string.
         public string GetConnectionString(string name)
         {
-            //This will return the connection string fetched from config file.
-            return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+            //This will return the connection string from appsettings.json as key value pair was used.
+            return _config.GetConnectionString(name);
+
+            ////This will return the connection string fetched from config file.
+            //return ConfigurationManager.ConnectionStrings[name].ConnectionString;
         }
 
         //This generic method is synchronous and will load data in type T list fetched from database using Dapper.

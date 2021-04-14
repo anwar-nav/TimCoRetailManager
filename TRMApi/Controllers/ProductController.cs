@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using TRMDataManger.Library.DataAccess;
 using TRMDataManger.Library.Models;
 
@@ -17,6 +18,13 @@ namespace TRMApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly IConfiguration _config;
+
+        public ProductController(IConfiguration config)
+        {
+            _config = config;
+        }
+
         // GET api/<controller>
         //This will create a List of ProductModel and use class library to access data and get products.
         [HttpGet]
@@ -25,7 +33,7 @@ namespace TRMApi.Controllers
             //This will get user id from entity framework user table.
             //string userId = RequestContext.Principal.Identity.GetUserId();
             //This will create an instance of ProductData class from Class Library.
-            ProductData data = new ProductData();
+            ProductData data = new ProductData(_config);
             //This will return the data.
             return data.GetProducts();
         }
