@@ -14,7 +14,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
     /// <summary>
     /// This will access database and have generic methods for loading and saving data.
     /// </summary>
-    internal class SQLDataAccess : IDisposable
+    public class SQLDataAccess : IDisposable, ISQLDataAccess
     {
         private IDbConnection _connection;
         private IDbTransaction _transaction;
@@ -45,7 +45,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
             string connectionString = GetConnectionString(connectionStringName);
 
             //Sql connection is made and query is executed and the result is saved in List of T type and returned.
-            using(IDbConnection connection = new SqlConnection(connectionString))
+            using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 List<T> rows = connection.Query<T>(storedProcedure, parameters,
                     commandType: CommandType.StoredProcedure).ToList();
@@ -87,7 +87,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
         {
             //Connection string of database.
             string connectionString = GetConnectionString(connectionStringName);
-            
+
             //Sql connection is made.
             _connection = new SqlConnection(connectionString);
 
@@ -104,7 +104,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
         public void CommitTransaction()
         {
             _transaction?.Commit();
-            _connection.Close();
+            _connection?.Close();
             isClosed = true;
         }
 
@@ -112,7 +112,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
         public void RollbackTransaction()
         {
             _transaction.Rollback();
-            _connection.Close();
+            _connection?.Close();
             isClosed = true;
         }
 
@@ -128,7 +128,7 @@ namespace TRMDataManger.Library.Internal.DataAccess
                 {
                     //TODO - Log this issue.
                     throw;
-                } 
+                }
             }
 
             _transaction = null;

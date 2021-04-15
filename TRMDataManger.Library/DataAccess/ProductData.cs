@@ -12,24 +12,21 @@ namespace TRMDataManger.Library.DataAccess
     /// <summary>
     /// This class will be used to call data from database and store the return values in ProductModel.
     /// </summary>
-    public class ProductData
+    public class ProductData : IProductData
     {
-        private readonly IConfiguration _config;
+        private readonly ISQLDataAccess _sql;
 
-        public ProductData(IConfiguration config)
+        public ProductData(ISQLDataAccess sql)
         {
-            _config = config;
+            _sql = sql;
         }
 
-        //This method create an instance for SQLDataAccess class and call the LoadData method of it.
         //For usage purposes an anonymous object of type dynamic is passed as the second argument of
         //LoadData method. This usage of dynamic only works if it is in same assembly.
         public List<ProductModel> GetProducts()
         {
-            SQLDataAccess sql = new SQLDataAccess(_config);
-
             //Beneficial for Unit testing.
-            var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", new { }, "TRMData");
+            var output = _sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", new { }, "TRMData");
 
             return output;
         }
@@ -37,10 +34,8 @@ namespace TRMDataManger.Library.DataAccess
         //This method will return the product details by id.
         public ProductModel GetProductsById(int productId)
         {
-            SQLDataAccess sql = new SQLDataAccess(_config);
-
             //Beneficial for Unit testing.
-            var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { id = productId }, "TRMData").FirstOrDefault();
+            var output = _sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { id = productId }, "TRMData").FirstOrDefault();
 
             return output;
         }

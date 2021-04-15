@@ -18,11 +18,11 @@ namespace TRMApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IProductData _productData;
 
-        public ProductController(IConfiguration config)
+        public ProductController(IProductData productData)
         {
-            _config = config;
+            _productData = productData;
         }
 
         // GET api/<controller>
@@ -32,10 +32,8 @@ namespace TRMApi.Controllers
         {
             //This will get user id from entity framework user table.
             //string userId = RequestContext.Principal.Identity.GetUserId();
-            //This will create an instance of ProductData class from Class Library.
-            ProductData data = new ProductData(_config);
             //This will return the data.
-            return data.GetProducts();
+            return _productData.GetProducts();
         }
     }
 }

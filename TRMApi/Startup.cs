@@ -16,6 +16,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using TRMApi.Models;
+using TRMDataManger.Library.DataAccess;
+using TRMDataManger.Library.Internal.DataAccess;
 //using Microsoft.Open
 
 namespace TRMApi
@@ -40,6 +42,14 @@ namespace TRMApi
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            //Personal Services
+            services.AddTransient<IInventoryData, InventoryData>();
+            services.AddTransient<IProductData, ProductData>();
+            services.AddTransient<ISaleData, SaleData>();
+            services.AddTransient<IUserData, UserData>();
+            services.AddTransient<ISQLDataAccess, SQLDataAccess>();
+
             //Configuration for taking tokens and making sure the user is authenticated and token has
             //not expired.
             services.AddAuthentication(options =>

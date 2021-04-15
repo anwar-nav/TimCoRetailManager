@@ -12,21 +12,22 @@ namespace TRMDataManger.Library.DataAccess
     /// <summary>
     /// This class will be used to store sale data into database and will be called in API.
     /// </summary>
-    public class SaleData
+    public class SaleData : ISaleData
     {
-        private readonly IConfiguration _config;
+        private readonly IProductData _productData;
+        private readonly ISQLDataAccess _sql;
 
-        public SaleData(IConfiguration config)
+        public SaleData(IProductData productData, ISQLDataAccess sql)
         {
-            _config = config;
+            _productData = productData;
+            _sql = sql;
         }
 
         //This method is used to store sale and sale detail data into database.
         public void SaveSale(SaleModel saleInfo, string cashierId)
         {
             List<SaleDetailDBModel> details = new List<SaleDetailDBModel>();
-            ProductData products = new ProductData(_config); // for getting the productId.
-            var taxRate = ConfigHelper.GetTaxRate()/100; //for getting taxrate from API web.config.
+            var taxRate = ConfigHelper.GetTaxRate() / 100; //for getting taxrate from API web.config.
 
 
             //A loop which goes throug every item in SaleModel provided by UI.
@@ -45,7 +46,7 @@ namespace TRMDataManger.Library.DataAccess
                 };
 
                 //Validating product existence in database and adding the details in productinfo variable.
-                var productinfo = products.GetProductsById(item.ProductId);
+                var productinfo = _productData.GetProductsById(item.ProductId);
 
                 if (productinfo == null)
                 {
@@ -83,38 +84,35 @@ namespace TRMDataManger.Library.DataAccess
             sale.Total = sale.SubTotal + sale.Tax;
 
             //This insertion is by way of transaction.
-            using (SQLDataAccess sql = new SQLDataAccess(_config))
+            try
             {
-                try
+                //This starts the transaction.
+                _sql.StartTransaction("TRMData");
+
+                //This calls the savedata method in this library and gives the name of store procedure to use along with
+                //populated sale data.
+                _sql.SaveDataInTransaction("dbo.spSale_Insert", sale);
+
+                //This gets the sales id of the sales just added in database. This is required because in saledetail the
+                //saleid is foreign key to the id present in sale table
+                int saleid = _sql.LoadDataInTransaction<int, dynamic>("dbo.spSale_Lookup", new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
+
+                //This adds all items of list populated above of sales items to the saledetail table based on sale id.
+                //For multiple calls to database look into advance dapper.
+                foreach (var item in details)
                 {
-                    //This starts the transaction.
-                    sql.StartTransaction("TRMData");
-
-                    //This calls the savedata method in this library and gives the name of store procedure to use along with
-                    //populated sale data.
-                    sql.SaveDataInTransaction("dbo.spSale_Insert", sale);
-
-                    //This gets the sales id of the sales just added in database. This is required because in saledetail the
-                    //saleid is foreign key to the id present in sale table
-                    int saleid = sql.LoadDataInTransaction<int, dynamic>("dbo.spSale_Lookup", new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
-
-                    //This adds all items of list populated above of sales items to the saledetail table based on sale id.
-                    //For multiple calls to database look into advance dapper.
-                    foreach (var item in details)
-                    {
-                        item.SaleId = saleid;
-                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
-                    }
-
-                    //This commits the transaction.
-                    sql.CommitTransaction();
+                    item.SaleId = saleid;
+                    _sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
                 }
-                catch
-                {
-                    //This rolls back the transaction if any of the insert is unsuccessfull.
-                    sql.RollbackTransaction();
-                    throw;
-                }
+
+                //This commits the transaction.
+                _sql.CommitTransaction();
+            }
+            catch
+            {
+                //This rolls back the transaction if any of the insert is unsuccessfull.
+                _sql.RollbackTransaction();
+                throw;
             }
 
             ////This was the individual way inserting sale.
@@ -139,9 +137,7 @@ namespace TRMDataManger.Library.DataAccess
         //This call the spSale_SaleReport and return the data.
         public List<SaleReportModel> GetSaleReport()
         {
-            SQLDataAccess sql = new SQLDataAccess(_config);
-
-            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { }, "TRMData");
+            var output = _sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { }, "TRMData");
 
             return output;
         }

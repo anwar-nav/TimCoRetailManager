@@ -24,15 +24,15 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly IConfiguration _config;
+        private readonly IUserData _userData;
 
         public UserController(ApplicationDbContext context, 
                                 UserManager<IdentityUser> userManager, 
-                                IConfiguration config)
+                                IUserData userData)
         {
             _context = context;
             _userManager = userManager;
-            _config = config;
+            _userData = userData;
         }
 
         //This will create UserModel and will get userId from Entity Framework Table and use that
@@ -42,10 +42,8 @@ namespace TRMApi.Controllers
         {
             //This will get user id from entity framework user table using Entity Framework.
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
-            //This will create an instance of UserData class from Class Library.
-            UserData data = new UserData(_config);
             //This will return the data.
-            return data.GetUserById(userId).First();
+            return _userData.GetUserById(userId).First();
         }
 
         //This method will return a List of ApplicationUserModel having the details of Users present in database with values
