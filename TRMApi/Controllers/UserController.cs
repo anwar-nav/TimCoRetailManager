@@ -41,7 +41,7 @@ namespace TRMApi.Controllers
         public UserModel GetById()
         {
             //This will get user id from entity framework user table using Entity Framework.
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
             //This will create an instance of UserData class from Class Library.
             UserData data = new UserData(_config);
             //This will return the data.
@@ -50,9 +50,9 @@ namespace TRMApi.Controllers
 
         //This method will return a List of ApplicationUserModel having the details of Users present in database with values
         //of User Id , Email and roles (with roleid and role name).
-        [Authorize(Roles = "Admin")]
         [HttpGet]
-        [Route("api/User/Admin/GetAllUsers")]
+        [Authorize(Roles = "Admin")]
+        [Route("Admin/GetAllUsers")]
         public List<ApplicationUserModel> GetAllUsers()
         {
             //This is object output of List of ApplicationUserModel which will be returned at end.
@@ -91,9 +91,9 @@ namespace TRMApi.Controllers
         }
 
         //This method returns all the Roles present in database using Entity Framework.
-        [Authorize(Roles = "Admin")]
         [HttpGet]
-        [Route("api/User/Admin/GetAllRoles")]
+        [Authorize(Roles = "Admin")]
+        [Route("Admin/GetAllRoles")]
         public Dictionary<string, string> GetAllRoles()
         {
             //This is storing all the roles present in database(AspNetRoles table) using the Db connection _context.
@@ -103,9 +103,9 @@ namespace TRMApi.Controllers
 
         //This method adds a Role in database using Entity Framework and takes the parameter of UserRolePairModel instead of
         //directly passing in the userid and rolename for security.
-        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route("api/User/Admin/AddRole")]
+        [Authorize(Roles = "Admin")]
+        [Route("Admin/AddRole")]
         public async Task AddARole(UserRolePairModel pairing)
         {
             var user = await _userManager.FindByIdAsync(pairing.UserId);
@@ -115,9 +115,9 @@ namespace TRMApi.Controllers
 
         //This method adds a Role in database using Entity Framework and takes the parameter of UserRolePairModel instead of
         //directly passing in the userid and rolename for security.
-        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route("api/User/Admin/RemoveRole")]
+        [Authorize(Roles = "Admin")]
+        [Route("Admin/RemoveRole")]
         public async Task RemoveARole(UserRolePairModel pairing)
         {
             var user = await _userManager.FindByIdAsync(pairing.UserId);
