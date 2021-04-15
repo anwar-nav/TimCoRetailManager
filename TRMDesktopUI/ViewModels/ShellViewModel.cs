@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TRMDesktopUI.EventModels;
 using TRMDesktopUI.Library.API;
@@ -26,7 +27,7 @@ namespace TRMDesktopUI.ViewModels
         private ILoggedInUserModel _user;
         private IAPIHelper _apiHelper;
 
-        //Constructor to load LoginViewModel and bring it upfront using ActivateItem method from
+        //Constructor to load LoginViewModel and bring it upfront using await ActivateItemAsync method from
         //base class Conductor. This is using constructor injection.
         //When ShellViewModel class will be instantiated then this constructor will be called 
         //and the constructor will ask for this parameter of type IEventAggregator and SalesViewModel; 
@@ -34,10 +35,10 @@ namespace TRMDesktopUI.ViewModels
         //by Bootstrapper class so the instance of IEventAggregator and SalesViewMode in the container will
         //be provided back by the container and these instances will be saved in private properties. Only ViewModels are
         //registered per request i.e. new every time requested.
-        //In ActivateItem method everytime a new instance of LoginViewModel will be provided by container. This is required
+        //In await ActivateItemAsync method everytime a new instance of LoginViewModel will be provided by container. This is required
         //because when LoginViewModel will get Activated again it will hold the previous values of username and password
         //so a new instance is required.
-        public ShellViewModel(IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user, IAPIHelper aPIHelper)
+        public  ShellViewModel(IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user, IAPIHelper aPIHelper)
         {
             _events = events; //setting private properties
             _salesVM = salesVM; //setting private properties
@@ -45,7 +46,7 @@ namespace TRMDesktopUI.ViewModels
             _apiHelper = aPIHelper; //setting private properties
             _events.Subscribe(this); //Subscribing to the event.
 
-            ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
+            ActivateItemAsync(IoC.Get<LoginViewModel>()); //Activating new instance every time.
         }
 
         public bool IsLoggedIn
@@ -63,31 +64,31 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        //This method will be called when an event of LogOnEvent is raised.
-        public void Handle(LogOnEvent message)
-        {
-            ActivateItem(_salesVM); //Avtivating the SalesView.
-            NotifyOfPropertyChange(() => IsLoggedIn);
-        }
-
         //This will close the application.
         public void ExitApplication()
         {
-            TryClose();
+            TryCloseAsync();
         }
 
         //This will logout.
-        public void LogOut()
+        public async Task LogOut()
         {
             _user.ResetLoggedInUserModel();
             _apiHelper.LogOfUser();
-            ActivateItem(IoC.Get<LoginViewModel>()); //Activating new instance every time.
+            await ActivateItemAsync(IoC.Get<LoginViewModel>()); //Activating new instance every time.
             NotifyOfPropertyChange(() => IsLoggedIn);
         }
 
-        public void UserManagement()
+        public async Task UserManagement()
         {
-            ActivateItem(IoC.Get<UserDisplayViewModel>()); //Activating new instance every time.
+            await ActivateItemAsync(IoC.Get<UserDisplayViewModel>()); //Activating new instance every time.
+        }
+
+        //This method will be called when an event of LogOnEvent is raised.
+        public async Task HandleAsync(LogOnEvent message, CancellationToken cancellationToken)
+        {
+            await ActivateItemAsync(_salesVM); //Avtivating the SalesView.
+            NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }
 }

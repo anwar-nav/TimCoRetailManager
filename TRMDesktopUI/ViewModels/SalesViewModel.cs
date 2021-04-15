@@ -269,15 +269,15 @@ namespace TRMDesktopUI.ViewModels
                 {
                     //This is setting the values of StatusInfoViewModel.
                     _status.UpdateMessage("Unauthorized", "You do not have permission to interact with Sales Form.");
-                    _windowManager.ShowDialog(_status, null, settings); //This will bring StatusInfoview as dialogbox
+                    _windowManager.ShowDialogAsync(_status, null, settings); //This will bring StatusInfoview as dialogbox
                 }
                 else
                 {
                     //This is setting the values of StatusInfoViewModel.
                     _status.UpdateMessage("Fatal Exception", ex.Message);
-                    _windowManager.ShowDialog(_status, null, settings); //This will bring StatusInfoview as dialogbox
+                    _windowManager.ShowDialogAsync(_status, null, settings); //This will bring StatusInfoview as dialogbox
                 }
-                TryClose();
+                TryCloseAsync();
             }
         }
 
