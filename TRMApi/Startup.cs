@@ -72,6 +72,12 @@ namespace TRMApi
                         Version = "v1"
                     });
             });
+
+            //Configuration to add authorization filter to every operation e.g get, post, put, delete
+            services.ConfigureSwaggerGen(setup =>
+            {
+                setup.OperationFilter<AuthorizationOperationFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
