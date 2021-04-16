@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -20,12 +21,14 @@ namespace TRMDataManger.Library.Internal.DataAccess
         private IDbTransaction _transaction;
         private bool isClosed = false;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
         //This dependency injection is done to access the GetConnectionString method for getting the 
         //connection string from appsettings.json
-        public SQLDataAccess(IConfiguration config)
+        public SQLDataAccess(IConfiguration config, ILogger<SQLDataAccess> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         //This method will take the name of connection as parameter and return connection string.
@@ -124,10 +127,9 @@ namespace TRMDataManger.Library.Internal.DataAccess
                 {
                     CommitTransaction();
                 }
-                catch
+                catch(Exception ex)
                 {
-                    //TODO - Log this issue.
-                    throw;
+                    _logger.LogError(ex, "Commit transaction failed in the dispose method");
                 }
             }
 

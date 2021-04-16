@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using TRMApi.Data;
 using TRMApi.Models;
 using TRMDataManger.Library.DataAccess;
@@ -25,14 +26,16 @@ namespace TRMApi.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserData _userData;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(ApplicationDbContext context, 
                                 UserManager<IdentityUser> userManager, 
-                                IUserData userData)
+                                IUserData userData, ILogger<UserController> logger)
         {
             _context = context;
             _userManager = userManager;
             _userData = userData;
+            _logger = logger;
         }
 
         //This will create UserModel and will get userId from Entity Framework Table and use that
@@ -106,7 +109,18 @@ namespace TRMApi.Controllers
         [Route("Admin/AddRole")]
         public async Task AddARole(UserRolePairModel pairing)
         {
+            //This will get user id from entity framework user table using Entity Framework.
+            string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
+            //This is the selected user from UI to which the selected roles will be added.
             var user = await _userManager.FindByIdAsync(pairing.UserId);
+
+            //This is logging the information that who has provided what role to a which user.
+            //This is not string interpolation i.e no $ sign is added before the string to make the 
+            //object visible because structured loggers require it to be a whole string in order to 
+            //perform queries on it. e.g serilog
+            _logger.LogInformation("Admin {Admin} added user {User} to role {Role}",
+                                    loggedInUserId, user.Id, pairing.RoleName);
+
             //This adds a role to user.
             await _userManager.AddToRoleAsync(user, pairing.RoleName);
         }
@@ -118,7 +132,18 @@ namespace TRMApi.Controllers
         [Route("Admin/RemoveRole")]
         public async Task RemoveARole(UserRolePairModel pairing)
         {
+            //This will get user id from entity framework user table using Entity Framework.
+            string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier).ToString(); //.Net Framework way - RequestContext.Principal.Identity.GetUserId();
+            //This is the selected user from UI from which the selected roles will be removed.
             var user = await _userManager.FindByIdAsync(pairing.UserId);
+
+            //This is logging the information that who has provided what role to a which user.
+            //This is not string interpolation i.e no $ sign is added before the string to make the 
+            //object visible because structured loggers require it to be a whole string in order to 
+            //perform queries on it. e.g serilog
+            _logger.LogInformation("Admin {Admin} removed user {User} from role {Role}",
+                                    loggedInUserId, user.Id, pairing.RoleName);
+
             //This adds a role to user.
             await _userManager.RemoveFromRoleAsync(user, pairing.RoleName);
         }
