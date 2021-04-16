@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TRMApi.Data;
 
@@ -16,11 +17,13 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public TokenController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public TokenController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         //This will create a token for the user.
@@ -82,7 +85,7 @@ namespace TRMApi.Controllers
             var token = new JwtSecurityToken(
                 new JwtHeader(//This will have details of signing
                     new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MySecretKey12312314asdasdkalsjda;s")),// this is my key
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Secrets:SecurityKey"))),// this is my key
                         SecurityAlgorithms.HmacSha256)),//this is algorithm for signing not encryption.
                 new JwtPayload(claims));//This is having the claims which were created above.
 
